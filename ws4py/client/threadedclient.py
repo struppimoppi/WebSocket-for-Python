@@ -7,7 +7,7 @@ __all__ = ['WebSocketClient']
 
 class WebSocketClient(WebSocketBaseClient):
     def __init__(self, url, protocols=None, extensions=None, heartbeat_freq=None,
-                 ssl_options=None, headers=None):
+                 ssl_options=None, headers=None, handshake_event=None):
         """
         .. code-block:: python
 
@@ -35,7 +35,7 @@ class WebSocketClient(WebSocketBaseClient):
                                      ssl_options, headers=headers)
         self._th = threading.Thread(target=self.run, name='WebSocketClient')
         self._th.daemon = True
-        self._hands_shaked = False
+        self._handshake_event = handshake_event or threading.Event()
 
     @property
     def daemon(self):
@@ -66,12 +66,12 @@ class WebSocketClient(WebSocketBaseClient):
 
         Starts the client's thread.
         """
-        self._hands_shaked = True
         self._th.start()
+        self._handshake_event.set()
         
     @property
     def connected(self):
-        return self._hands_shaked and self._th.is_alive() and not self.terminated
+        return self._handshake_event.is_set() and self._th.is_alive() and not self.terminated
 
 if __name__ == '__main__':
     from ws4py.client.threadedclient import WebSocketClient
