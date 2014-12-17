@@ -298,8 +298,8 @@ class WebSocket(object):
 
         try:
             b = self.sock.recv(self.reading_buffer_size)
-        except socket.error:
-            logger.exception("Failed to receive data")
+        except socket.error as exp:
+            logger.error("Failed to receive data: %s" % exp)
             return False
         else:
             if not self.process(b):
